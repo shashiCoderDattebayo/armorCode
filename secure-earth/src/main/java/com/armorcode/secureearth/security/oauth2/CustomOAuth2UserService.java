@@ -1,8 +1,11 @@
 package com.armorcode.secureearth.security.oauth2;
 
 import com.armorcode.secureearth.model.AuthProvider;
+import com.armorcode.secureearth.model.Tenant;
 import com.armorcode.secureearth.model.User;
 import com.armorcode.secureearth.exception.OAuth2AuthenticationProcessingException;
+import com.armorcode.secureearth.model.UserRole;
+import com.armorcode.secureearth.repository.TenantRepository;
 import com.armorcode.secureearth.repository.UserRepository;
 import com.armorcode.secureearth.security.UserPrincipal;
 import com.armorcode.secureearth.security.oauth2.user.OAuth2UserInfo;
@@ -24,6 +27,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TenantRepository tenantRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -49,12 +55,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User user;
         if(userOptional.isPresent()) {
             user = userOptional.get();
-            if(!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
+            AuthProvider authProvider = AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId());
+            AuthProvider provider = user.getProvider();
+            if(!AuthProvider.NONE.equals(provider) && !provider.equals(authProvider)) {
                 throw new OAuth2AuthenticationProcessingException("Looks like you're signed up with " +
                         user.getProvider() + " account. Please use your " + user.getProvider() +
                         " account to login.");
             }
-            user = updateExistingUser(user, oAuth2UserInfo);
+            user = updateExistingUser(user, oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2UserInfo);
         } else {
             user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo);
         }
@@ -70,12 +78,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         user.setName(oAuth2UserInfo.getName());
         user.setEmail(oAuth2UserInfo.getEmail());
         user.setImageUrl(oAuth2UserInfo.getImageUrl());
+        user.setUserRole(UserRole.DEVELOPER);
+        Optional<Tenant> aPublic = tenantRepository.findByName("PUBLIC");
+        user.setTenant(aPublic.get());
         return userRepository.save(user);
     }
 
-    private User updateExistingUser(User existingUser, OAuth2UserInfo oAuth2UserInfo) {
+    private User updateExistingUser(User existingUser, String registrationId, OAuth2UserInfo oAuth2UserInfo) {
         existingUser.setName(oAuth2UserInfo.getName());
         existingUser.setImageUrl(oAuth2UserInfo.getImageUrl());
+
+        if (existingUser.getProviderId() == null) {
+            existingUser.setProvider(AuthProvider.valueOf(registrationId));
+            existingUser.setProviderId(oAuth2UserInfo.getId());
+        }
         return userRepository.save(existingUser);
     }
 

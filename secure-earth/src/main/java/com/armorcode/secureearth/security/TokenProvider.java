@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class TokenProvider {
@@ -26,8 +28,11 @@ public class TokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + appProperties.getAuth().getTokenExpirationMsec());
 
+        Map<String, Object> claimsMap = new HashMap<>();
+        claimsMap.put("userId", Long.toString(userPrincipal.getId()));
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
+                .setClaims(claimsMap)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, appProperties.getAuth().getTokenSecret())
@@ -40,7 +45,7 @@ public class TokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        return Long.parseLong(claims.getSubject());
+        return Long.parseLong((String) claims.get("userId"));
     }
 
     public boolean validateToken(String authToken) {

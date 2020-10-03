@@ -14,7 +14,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
     @Email
@@ -34,6 +33,15 @@ public class User {
     private AuthProvider provider;
 
     private String providerId;
+
+    @NotNull
+    @ManyToOne
+    private Tenant tenant;
+
+    @NotNull
+    @Column
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
 
     public Long getId() {
         return id;
@@ -97,5 +105,21 @@ public class User {
 
     public void setProviderId(String providerId) {
         this.providerId = providerId;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    public UserRole getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(UserRole userRole) {
+        this.userRole = userRole;
     }
 }
