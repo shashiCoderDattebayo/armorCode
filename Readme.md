@@ -62,7 +62,7 @@
 
 	*Also, make sure that the above mentioned scopes are added in the OAuth2 provider console.*	For example, scope `email` and `profile` should be added in your Google project's OAuth2 consent screen.
 
-+ **Run spring-social**
++ **Run armorCode**
 
 	```bash
 	mvn spring-boot:run
