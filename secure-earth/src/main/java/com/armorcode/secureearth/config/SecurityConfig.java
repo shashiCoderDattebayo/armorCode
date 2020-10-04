@@ -3,7 +3,7 @@ package com.armorcode.secureearth.config;
 import com.armorcode.secureearth.security.CustomUserDetailsService;
 import com.armorcode.secureearth.security.RestAuthenticationEntryPoint;
 import com.armorcode.secureearth.security.TokenAuthenticationFilter;
-import com.example.springsocial.security.*;
+import com.armorcode.secureearth.security.*;
 import com.armorcode.secureearth.security.oauth2.CustomOAuth2UserService;
 import com.armorcode.secureearth.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import com.armorcode.secureearth.security.oauth2.OAuth2AuthenticationFailureHandler;
@@ -111,6 +111,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/**/*.js")
                         .permitAll()
                     .antMatchers("/auth/**", "/oauth2/**")
+                        .permitAll()
+                    .antMatchers("/bandit/**")
                         .permitAll()
                     .anyRequest()
                         .authenticated()

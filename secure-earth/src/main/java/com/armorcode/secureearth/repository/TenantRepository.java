@@ -1,19 +1,16 @@
 package com.armorcode.secureearth.repository;
 
+import com.armorcode.secureearth.model.Tenant;
 import com.armorcode.secureearth.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface TenantRepository extends JpaRepository<Tenant, Long> {
 
-    Optional<User> findByEmail(String email);
+    Optional<Tenant> findByName(String name);
 
-    List<User> findAllByTenantId(Long id);
-
-    Boolean existsByEmail(String email);
-
+    Boolean existsByName(String name);
 }
